@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-export default function PageSummary({ documentName, page, getPageText }) {
+export default function PageSummary({ documentName, page, getPageText, onClose }) {
   const [status, setStatus] = useState("idle");
   const [summary, setSummary] = useState("");
   const [error, setError] = useState("");
@@ -40,9 +40,12 @@ export default function PageSummary({ documentName, page, getPageText }) {
           <h2>Page summary</h2>
         </div>
         <span className="summary-page">{page}</span>
+        <button className="summary-close" onClick={onClose} aria-label="Close summary">×</button>
       </div>
       {status === "ready" ? (
-        <div className="summary-text">{summary}</div>
+        <ul className="summary-text">
+          {summary.split("\n").map((point) => point.replace(/^\s*[-*•]\s*/, "").trim()).filter(Boolean).map((point, index) => <li key={index}>{point}</li>)}
+        </ul>
       ) : (
         <p className={status === "error" ? "summary-error" : "summary-placeholder"}>
           {status === "loading"

@@ -15,7 +15,7 @@ export default function PdfReader(props) {
     highlightsByPage,
     getPageText,
   } = props;
-  const [summaryOpen, setSummaryOpen] = useState(true),
+  const [summaryOpen, setSummaryOpen] = useState(false),
     [summaryWidth, setSummaryWidth] = useState(330);
   const resizeSummary = (event) => {
     const startX = event.clientX,
@@ -47,11 +47,7 @@ export default function PdfReader(props) {
   }, [documentState.pdf.numPages, page, setPage]);
   return (
     <div className="reader">
-      <PdfToolbar
-        {...props}
-        summaryOpen={summaryOpen}
-        toggleSummary={() => setSummaryOpen((open) => !open)}
-      />
+      <PdfToolbar {...props} />
       <div className="reader-content">
         <div className="page-scroll" ref={scrollRef} onScroll={onDismissPopover}>
           {loading && <div className="loading">Rendering PDF…</div>}
@@ -82,9 +78,10 @@ export default function PdfReader(props) {
         {summaryOpen && (
           <div className="summary-drawer" style={{ width: summaryWidth, flexBasis: summaryWidth }}>
             <div className="summary-resize-handle" onPointerDown={resizeSummary} />
-            <PageSummary documentName={documentState.name} page={page} getPageText={getPageText} />
+            <PageSummary documentName={documentState.name} page={page} getPageText={getPageText} onClose={() => setSummaryOpen(false)} />
           </div>
         )}
+        {!summaryOpen && <button className="summary-launcher" onClick={() => setSummaryOpen(true)}>✦ Summary</button>}
       </div>
     </div>
   );
