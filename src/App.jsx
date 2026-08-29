@@ -6,7 +6,7 @@ import DefinitionPopover from "./components/dictionary/DefinitionPopover";
 import Toast from "./components/ui/Toast";
 import usePdfViewer from "./hooks/usePdfViewer";
 import { lookupDefinitions } from "./services/dictionaryService";
-import { cleanSelection } from "./utils/text";
+import { cleanSelection, snapRangeToWordBoundaries } from "./utils/text";
 import {
   deleteSavedPdf,
   getSavedPdf,
@@ -111,6 +111,8 @@ export default function App() {
       if (!selection?.rangeCount || selection.isCollapsed) return hidePopover();
       const range = selection.getRangeAt(0);
       if (!textLayer.contains(range.commonAncestorContainer)) return;
+      snapRangeToWordBoundaries(range);
+      if (range.collapsed) return hidePopover();
       const word = cleanSelection(selection.toString()).toLowerCase(),
         rect = range.getBoundingClientRect();
       if (!word || (!rect.width && !rect.height)) return hidePopover();
