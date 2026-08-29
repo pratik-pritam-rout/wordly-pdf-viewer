@@ -13,6 +13,8 @@ export default function PdfToolbar({
   zoomIn,
   zoomOut,
   closePdf,
+  summaryOpen,
+  toggleSummary,
 }) {
   const total = documentState.pdf.numPages;
   return (
@@ -21,6 +23,9 @@ export default function PdfToolbar({
         <div className="document-name">{documentState.name}</div>
         <button className="close-document" onClick={closePdf} aria-label="Close PDF">
           Close
+        </button>
+        <button className="summary-toggle" onClick={toggleSummary}>
+          {summaryOpen ? "Hide summary" : "Show summary"}
         </button>
       </div>
       <div className="controls">

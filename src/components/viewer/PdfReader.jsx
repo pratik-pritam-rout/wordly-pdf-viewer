@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import PdfToolbar from "./PdfToolbar";
 import PageSummary from "../summary/PageSummary";
 export default function PdfReader(props) {
@@ -15,6 +15,20 @@ export default function PdfReader(props) {
     highlightsByPage,
     getPageText,
   } = props;
+  const [summaryOpen, setSummaryOpen] = useState(true),
+    [summaryWidth, setSummaryWidth] = useState(330);
+  const resizeSummary = (event) => {
+    const startX = event.clientX,
+      startWidth = summaryWidth;
+    const move = (next) =>
+      setSummaryWidth(Math.min(520, Math.max(260, startWidth + startX - next.clientX)));
+    const stop = () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", stop);
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", stop);
+  };
   const onWheel = (event) => {
     onDismissPopover();
     const area = event.currentTarget,
@@ -46,7 +60,11 @@ export default function PdfReader(props) {
   }, [documentState.pdf.numPages, page, setPage]);
   return (
     <div className="reader">
-      <PdfToolbar {...props} />
+      <PdfToolbar
+        {...props}
+        summaryOpen={summaryOpen}
+        toggleSummary={() => setSummaryOpen((open) => !open)}
+      />
       <div className="reader-content">
         <div className="page-scroll" ref={scrollRef} onScroll={onDismissPopover} onWheel={onWheel}>
           {loading && <div className="loading">Rendering PDF…</div>}
@@ -74,7 +92,12 @@ export default function PdfReader(props) {
             </div>
           </div>
         </div>
-        <PageSummary documentName={documentState.name} page={page} getPageText={getPageText} />
+        {summaryOpen && (
+          <div className="summary-drawer" style={{ width: summaryWidth, flexBasis: summaryWidth }}>
+            <div className="summary-resize-handle" onPointerDown={resizeSummary} />
+            <PageSummary documentName={documentState.name} page={page} getPageText={getPageText} />
+          </div>
+        )}
       </div>
     </div>
   );

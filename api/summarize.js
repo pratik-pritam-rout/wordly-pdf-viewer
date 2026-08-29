@@ -1,5 +1,4 @@
-const GEMINI_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent";
+const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/interactions";
 const MAX_PAGE_CHARACTERS = 30000;
 
 export default {
@@ -23,25 +22,23 @@ export default {
         headers: {
           "Content-Type": "application/json",
           "x-goog-api-key": process.env.GEMINI_API_KEY,
+          "Api-Revision": "2026-05-20",
         },
         body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: `Summarize page ${page} of \"${documentName || "this PDF"}\". Use 3-5 concise bullet points. Preserve important names, facts, and numbers. Do not invent information.\n\nPage text:\n${text.slice(0, MAX_PAGE_CHARACTERS)}`,
-                },
-              ],
-            },
-          ],
-          generationConfig: { temperature: 0.2, maxOutputTokens: 500 },
+          model: "gemini-3.6-flash",
+          store: false,
+          input: `Summarize page ${page} of \"${documentName || "this PDF"}\". Use 3-5 concise bullet points. Preserve important names, facts, and numbers. Do not invent information.\n\nPage text:\n${text.slice(0, MAX_PAGE_CHARACTERS)}`,
         }),
       });
       const payload = await response.json();
       if (!response.ok) throw Error(payload.error?.message || "Gemini could not create a summary.");
-      const summary = payload.candidates?.[0]?.content?.parts
-        ?.map((part) => part.text)
-        .join("")
+      const summary = [
+        payload.output_text,
+        ...(payload.steps || []).flatMap((step) => step.content || []).map((part) => part.text),
+        ...(payload.outputs || []).map((output) => output.text),
+      ]
+        .filter(Boolean)
+        .join("\n")
         .trim();
       if (!summary) throw Error("Gemini returned an empty summary.");
       return Response.json({ summary });

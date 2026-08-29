@@ -234,6 +234,17 @@ h1 {
 .close-document:hover {
   background: #edf4f5;
 }
+.summary-toggle {
+  border: 1px solid #d5dee4;
+  border-radius: 5px;
+  background: #fff;
+  color: #53636c;
+  padding: 0.28rem 0.48rem;
+  font-size: 0.78rem;
+}
+.summary-toggle:hover {
+  background: #edf4f5;
+}
 .controls {
   display: flex;
   align-items: center;
@@ -291,9 +302,27 @@ h1 {
   padding: clamp(1rem, 3vw, 2.5rem);
   background: #e7edf0;
 }
-.summary-panel {
-  width: 330px;
+.summary-drawer {
+  position: relative;
   flex: 0 0 330px;
+  min-width: 260px;
+  max-width: 520px;
+}
+.summary-resize-handle {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  bottom: 0;
+  left: -4px;
+  width: 8px;
+  cursor: col-resize;
+}
+.summary-resize-handle:hover {
+  background: rgba(70, 129, 102, 0.35);
+}
+.summary-panel {
+  width: 100%;
+  height: 100%;
   overflow: auto;
   padding: 1.25rem;
   border-left: 1px solid #dce4eb;
@@ -534,10 +563,17 @@ h1 {
   .reader-content {
     flex-direction: column;
   }
-  .summary-panel {
+  .summary-drawer {
     width: 100%;
     flex-basis: auto;
+    max-width: none;
+    min-width: 0;
+  }
+  .summary-panel {
     border-top: 1px solid #dce4eb;
     border-left: 0;
+  }
+  .summary-resize-handle {
+    display: none;
   }
 }
