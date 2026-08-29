@@ -117,6 +117,10 @@ export default function usePdfViewer({
     setPage(next);
     setPageInput(String(next));
   };
+  const getPageText = async () => {
+    const pdfPage = await documentState.pdf.getPage(page);
+    return (await pdfPage.getTextContent()).items.map((item) => item.str).join(" ");
+  };
   return {
     documentState,
     page,
@@ -131,6 +135,7 @@ export default function usePdfViewer({
     openStoredPdf: (record) =>
       loadPdf(record.blob, record.name, record.id, record.lastPage || 1, record.highlights || {}),
     closePdf,
+    getPageText,
     jumpToPage,
     zoomIn: () => setScale((value) => Math.min(MAX_SCALE, value + 0.2)),
     zoomOut: () => setScale((value) => Math.max(MIN_SCALE, value - 0.2)),
