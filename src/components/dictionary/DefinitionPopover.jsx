@@ -50,8 +50,13 @@ export default function DefinitionPopover({
       ) : isHighlightOnly ? null : (
         <span className={status === "error" ? "popover-error" : ""}>{message}</span>
       )}
-      <button className="highlight-button" onClick={onHighlight}>
-        {isHighlightOnly ? "Highlight selection" : "Highlight text"}
+      <button
+        className="highlight-button"
+        onClick={onHighlight}
+        aria-label="Highlight selection"
+        title="Highlight selection"
+      >
+        🖊️
       </button>
     </aside>
   );

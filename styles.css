@@ -309,8 +309,9 @@ h1 {
 .text-highlight {
   position: absolute;
   border-radius: 2px;
-  background: rgba(255, 221, 84, 0.42);
+  background: #ffe766;
   mix-blend-mode: multiply;
+  opacity: 0.42;
 }
 .textLayer {
   position: absolute;
@@ -407,13 +408,14 @@ h1 {
 }
 .highlight-button {
   margin-top: 0.55rem;
+  width: 29px;
+  height: 29px;
   border: 1px solid rgba(184, 229, 202, 0.45);
   border-radius: 5px;
   background: transparent;
-  color: #b8e5ca;
-  padding: 0.35rem 0.5rem;
-  font-size: 0.78rem;
-  font-weight: 700;
+  padding: 0;
+  font-size: 0.92rem;
+  line-height: 1;
 }
 .highlight-button:hover {
   background: rgba(184, 229, 202, 0.12);

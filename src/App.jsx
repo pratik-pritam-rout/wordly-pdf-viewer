@@ -113,18 +113,38 @@ export default function App() {
       if (!textLayer.contains(range.commonAncestorContainer)) return;
       const word = cleanSelection(selection.toString()).toLowerCase(),
         rect = range.getBoundingClientRect();
-      if (!word || word.length > 80 || (!rect.width && !rect.height)) return hidePopover();
+      if (!word || (!rect.width && !rect.height)) return hidePopover();
       const pageRect = textLayer.parentElement.getBoundingClientRect();
-      const rectangles = [...range.getClientRects()]
+      const lineRectangles = [...range.getClientRects()]
         .filter((selectionRect) => selectionRect.width && selectionRect.height)
         .map((selectionRect) => ({
-          left: `${((selectionRect.left - pageRect.left) / pageRect.width) * 100}%`,
-          top: `${((selectionRect.top - pageRect.top) / pageRect.height) * 100}%`,
-          width: `${(selectionRect.width / pageRect.width) * 100}%`,
-          height: `${(selectionRect.height / pageRect.height) * 100}%`,
+          left: selectionRect.left - pageRect.left,
+          top: selectionRect.top - pageRect.top,
+          right: selectionRect.right - pageRect.left,
+          bottom: selectionRect.bottom - pageRect.top,
+        }))
+        .sort((first, second) => first.top - second.top || first.left - second.left)
+        .reduce((lines, rectangle) => {
+          const line = lines.find((item) => Math.abs(item.top - rectangle.top) < 3);
+          if (line) {
+            line.left = Math.min(line.left, rectangle.left);
+            line.right = Math.max(line.right, rectangle.right);
+            line.top = Math.min(line.top, rectangle.top);
+            line.bottom = Math.max(line.bottom, rectangle.bottom);
+          } else {
+            lines.push({ ...rectangle });
+          }
+          return lines;
+        }, [])
+        .map((rectangle) => ({
+          left: `${(rectangle.left / pageRect.width) * 100}%`,
+          top: `${(rectangle.top / pageRect.height) * 100}%`,
+          width: `${((rectangle.right - rectangle.left) / pageRect.width) * 100}%`,
+          height: `${((rectangle.bottom - rectangle.top) / pageRect.height) * 100}%`,
         }));
-      setPendingHighlight({ page: viewer.page, rectangles });
-      if (word.split(/\s+/).length > 1) {
+      if (!lineRectangles.length) return hidePopover();
+      setPendingHighlight({ page: viewer.page, rectangles: lineRectangles });
+      if (word.split(/\s+/).length > 1 || word.length > 80) {
         return setPopover({
           status: "highlight-only",
           left: rect.left,
