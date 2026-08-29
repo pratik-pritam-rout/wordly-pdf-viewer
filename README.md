@@ -51,7 +51,7 @@ The built files are created in the `dist` folder.
 
 ## AI page summaries
 
-Wordly can summarize the currently displayed page through Gemini. This feature is designed for Vercel deployment: add `GEMINI_API_KEY` as an environment variable in the Vercel project settings. The key is used only by `api/summarize.js` on the server and is never sent to the browser.
+Wordly can summarize the currently displayed page through Gemini 3.6 Flash. This feature is designed for Vercel deployment: add `GEMINI_API_KEY` as an environment variable in the Vercel project settings. The key is used only by `api/summarize.js` on the server and is never sent to the browser.
 
 ## How to use
 
