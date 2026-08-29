@@ -195,9 +195,22 @@ h1 {
   flex-direction: column;
 }
 .reader-content {
+  position: relative;
   display: flex;
   min-height: 0;
   flex: 1;
+}
+.summary-launcher {
+  position: absolute;
+  z-index: 4;
+  top: 1.1rem;
+  right: 1.1rem;
+  border: 1px solid #d5dee4;
+  border-radius: 6px;
+  background: #fff;
+  color: #29495b;
+  padding: 0.55rem 0.7rem;
+  font-weight: 700;
 }
 .toolbar {
   min-height: 56px;

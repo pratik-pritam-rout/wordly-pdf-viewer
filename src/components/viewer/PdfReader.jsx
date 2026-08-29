@@ -81,7 +81,7 @@ export default function PdfReader(props) {
             <PageSummary documentName={documentState.name} page={page} getPageText={getPageText} onClose={() => setSummaryOpen(false)} />
           </div>
         )}
-        {!summaryOpen && <button className="summary-launcher" onClick={() => setSummaryOpen(true)}>✦ Summary</button>}
+        {!summaryOpen && <button className="summary-launcher" onClick={() => setSummaryOpen(true)}>✦ Page summary</button>}
       </div>
     </div>
   );
