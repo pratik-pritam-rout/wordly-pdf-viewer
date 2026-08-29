@@ -4,7 +4,13 @@ import { clearDefinitionCache } from "../services/dictionaryService";
 const DEFAULT_SCALE = 1.4,
   MIN_SCALE = 0.6,
   MAX_SCALE = 3;
-export default function usePdfViewer({ hidePopover, showToast, onPdfUpload, onPdfClose }) {
+export default function usePdfViewer({
+  hidePopover,
+  showToast,
+  onPdfUpload,
+  onPdfClose,
+  highlightsByPage,
+}) {
   const [documentState, setDocumentState] = useState(null),
     [page, setPage] = useState(1),
     [pageInput, setPageInput] = useState("1"),
@@ -59,14 +65,20 @@ export default function usePdfViewer({ hidePopover, showToast, onPdfUpload, onPd
       cancelled = true;
     };
   }, [documentState, page, scale]);
-  async function loadPdf(file, name = file.name, savedPdfId = null, initialPage = 1) {
+  async function loadPdf(
+    file,
+    name = file.name,
+    savedPdfId = null,
+    initialPage = 1,
+    highlights = {}
+  ) {
     try {
       setLoading(true);
       const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
       clearDefinitionCache();
       setPage(Math.min(Math.max(initialPage, 1), pdf.numPages));
       setScale(DEFAULT_SCALE);
-      setDocumentState({ pdf, name, savedPdfId });
+      setDocumentState({ pdf, name, savedPdfId, highlights });
       return true;
     } catch (error) {
       console.error(error);
@@ -83,12 +95,18 @@ export default function usePdfViewer({ hidePopover, showToast, onPdfUpload, onPd
     if (await loadPdf(file)) {
       const savedPdf = await onPdfUpload?.(file);
       if (savedPdf) {
-        setDocumentState((current) => (current ? { ...current, savedPdfId: savedPdf.id } : null));
+        setDocumentState((current) =>
+          current
+            ? { ...current, savedPdfId: savedPdf.id, highlights: savedPdf.highlights || {} }
+            : null
+        );
       }
     }
   }
   async function closePdf() {
-    if (documentState?.savedPdfId) await onPdfClose?.(documentState.savedPdfId, page);
+    if (documentState?.savedPdfId) {
+      await onPdfClose?.(documentState.savedPdfId, page, highlightsByPage);
+    }
     hidePopover();
     setDocumentState(null);
   }
@@ -110,7 +128,8 @@ export default function usePdfViewer({ hidePopover, showToast, onPdfUpload, onPd
     textLayerRef,
     scrollRef,
     openPdf,
-    openStoredPdf: (record) => loadPdf(record.blob, record.name, record.id, record.lastPage || 1),
+    openStoredPdf: (record) =>
+      loadPdf(record.blob, record.name, record.id, record.lastPage || 1, record.highlights || {}),
     closePdf,
     jumpToPage,
     zoomIn: () => setScale((value) => Math.min(MAX_SCALE, value + 0.2)),

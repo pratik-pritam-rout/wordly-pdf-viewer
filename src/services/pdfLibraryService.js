@@ -53,6 +53,7 @@ export async function savePdf(file) {
     lastModified: file.lastModified || savedAt,
     savedAt,
     lastPage: existing?.lastPage || 1,
+    highlights: existing?.highlights || {},
     blob: file,
   };
   await withStore("readwrite", (store) => store.put(record));
@@ -63,8 +64,8 @@ export const getSavedPdf = (id) => withStore("readonly", (store) => store.get(id
 
 export const deleteSavedPdf = (id) => withStore("readwrite", (store) => store.delete(id));
 
-export async function updateSavedPdfPage(id, lastPage) {
+export async function updateSavedPdfProgress(id, lastPage, highlights) {
   const record = await getSavedPdf(id);
   if (!record) return;
-  await withStore("readwrite", (store) => store.put({ ...record, lastPage }));
+  await withStore("readwrite", (store) => store.put({ ...record, lastPage, highlights }));
 }

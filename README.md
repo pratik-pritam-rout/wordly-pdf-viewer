@@ -12,6 +12,7 @@ PDFs are processed in the browser. Uploaded PDFs and reading progress are saved 
 - Save uploaded PDFs locally in the browser with IndexedDB
 - Reopen saved PDFs directly from the **On this device** library
 - Resume a saved PDF on the page where it was last closed
+- Keep text highlights when a saved PDF is closed and reopened
 - Remove saved PDFs from the local device library
 - Navigate pages using toolbar controls, the mouse wheel, or the Left and Right Arrow keys
 - Zoom from 60% to 300%

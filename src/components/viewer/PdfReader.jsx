@@ -11,6 +11,7 @@ export default function PdfReader(props) {
     onTextSelection,
     onDismissPopover,
     setPage,
+    highlightsByPage,
   } = props;
   const onWheel = (event) => {
     onDismissPopover();
@@ -49,6 +50,17 @@ export default function PdfReader(props) {
         <div className="page-container">
           <div className="pdf-page">
             <canvas ref={canvasRef} />
+            <div className="highlight-layer" aria-hidden="true">
+              {(highlightsByPage[page] || []).flatMap((highlight) =>
+                highlight.rectangles.map((rectangle, index) => (
+                  <div
+                    key={`${highlight.id}-${index}`}
+                    className="text-highlight"
+                    style={rectangle}
+                  />
+                ))
+              )}
+            </div>
             <div
               ref={textLayerRef}
               className="textLayer"

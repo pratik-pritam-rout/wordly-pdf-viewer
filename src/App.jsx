@@ -12,14 +12,16 @@ import {
   getSavedPdf,
   listSavedPdfs,
   savePdf,
-  updateSavedPdfPage,
+  updateSavedPdfProgress,
 } from "./services/pdfLibraryService";
 
 export default function App() {
   const [popover, setPopover] = useState(null),
     [toast, setToast] = useState(""),
     [savedPdfs, setSavedPdfs] = useState([]),
-    [libraryLoading, setLibraryLoading] = useState(true);
+    [libraryLoading, setLibraryLoading] = useState(true),
+    [highlightsByPage, setHighlightsByPage] = useState({}),
+    [pendingHighlight, setPendingHighlight] = useState(null);
   const timerRef = useRef(null),
     lookupIdRef = useRef(0);
   const showToast = (message) => {
@@ -51,14 +53,14 @@ export default function App() {
       showToast("The PDF opened, but your browser could not save it locally.");
     }
   };
-  const saveClosedPdfPage = async (id, page) => {
+  const saveClosedPdfPage = async (id, page, highlights) => {
     try {
-      await updateSavedPdfPage(id, page);
+      await updateSavedPdfProgress(id, page, highlights);
       setSavedPdfs((items) =>
-        items.map((item) => (item.id === id ? { ...item, lastPage: page } : item))
+        items.map((item) => (item.id === id ? { ...item, lastPage: page, highlights } : item))
       );
     } catch {
-      showToast("The PDF closed, but its page could not be saved.");
+      showToast("The PDF closed, but its reading progress could not be saved.");
     }
   };
   const openSavedPdf = async (id) => {
@@ -83,7 +85,25 @@ export default function App() {
     showToast,
     onPdfUpload: saveUploadedPdf,
     onPdfClose: saveClosedPdfPage,
+    highlightsByPage,
   });
+  useEffect(() => {
+    setHighlightsByPage(viewer.documentState?.highlights || {});
+    setPendingHighlight(null);
+  }, [viewer.documentState?.pdf, viewer.documentState?.highlights]);
+  const addHighlight = () => {
+    if (!pendingHighlight) return;
+    const { page, rectangles } = pendingHighlight;
+    setHighlightsByPage((pages) => ({
+      ...pages,
+      [page]: [
+        ...(pages[page] || []),
+        { id: window.crypto?.randomUUID?.() || Date.now(), rectangles },
+      ],
+    }));
+    setPendingHighlight(null);
+    showToast("Text highlighted.");
+  };
   function handleSelection(textLayer) {
     window.clearTimeout(timerRef.current);
     timerRef.current = window.setTimeout(async () => {
@@ -94,6 +114,24 @@ export default function App() {
       const word = cleanSelection(selection.toString()).toLowerCase(),
         rect = range.getBoundingClientRect();
       if (!word || word.length > 80 || (!rect.width && !rect.height)) return hidePopover();
+      const pageRect = textLayer.parentElement.getBoundingClientRect();
+      const rectangles = [...range.getClientRects()]
+        .filter((selectionRect) => selectionRect.width && selectionRect.height)
+        .map((selectionRect) => ({
+          left: `${((selectionRect.left - pageRect.left) / pageRect.width) * 100}%`,
+          top: `${((selectionRect.top - pageRect.top) / pageRect.height) * 100}%`,
+          width: `${(selectionRect.width / pageRect.width) * 100}%`,
+          height: `${(selectionRect.height / pageRect.height) * 100}%`,
+        }));
+      setPendingHighlight({ page: viewer.page, rectangles });
+      if (word.split(/\s+/).length > 1) {
+        return setPopover({
+          status: "highlight-only",
+          left: rect.left,
+          top: rect.bottom + 9,
+          anchorTop: rect.top,
+        });
+      }
       const requestId = ++lookupIdRef.current;
       const show = (content) =>
         requestId === lookupIdRef.current &&
@@ -125,10 +163,15 @@ export default function App() {
             onRemoveSaved={removeSavedPdf}
           />
         ) : (
-          <PdfReader {...viewer} onTextSelection={handleSelection} onDismissPopover={hidePopover} />
+          <PdfReader
+            {...viewer}
+            highlightsByPage={highlightsByPage}
+            onTextSelection={handleSelection}
+            onDismissPopover={hidePopover}
+          />
         )}
       </section>
-      {popover && <DefinitionPopover {...popover} />}
+      {popover && <DefinitionPopover {...popover} onHighlight={addHighlight} />}
       {toast && <Toast message={toast} />}
     </main>
   );

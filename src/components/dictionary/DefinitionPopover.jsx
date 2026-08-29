@@ -7,6 +7,7 @@ export default function DefinitionPopover({
   left,
   top,
   anchorTop,
+  onHighlight,
 }) {
   const ref = useRef(null),
     [position, setPosition] = useState({ left, top, below: false });
@@ -25,6 +26,7 @@ export default function DefinitionPopover({
     status === "loading"
       ? "Looking up definitions…"
       : "Couldn’t load definitions. Please try again.";
+  const isHighlightOnly = status === "highlight-only";
   return (
     <aside
       ref={ref}
@@ -32,20 +34,25 @@ export default function DefinitionPopover({
       style={{ left: position.left, top: position.top }}
       role="status"
     >
-      <strong className="popover-word">{word}</strong>
-      {meta && <div className="popover-meta">{meta}</div>}
+      {!isHighlightOnly && <strong className="popover-word">{word}</strong>}
+      {!isHighlightOnly && meta && <div className="popover-meta">{meta}</div>}
       {status === "ready" ? (
-        <ol className="definition-list">
-          {definitions.slice(0, 3).map((item, index) => (
-            <li key={`${item.partOfSpeech}-${index}`}>
-              <span className="definition-part">{item.partOfSpeech}</span>
-              {item.text}
-            </li>
-          ))}
-        </ol>
-      ) : (
+        <>
+          <ol className="definition-list">
+            {definitions.slice(0, 3).map((item, index) => (
+              <li key={`${item.partOfSpeech}-${index}`}>
+                <span className="definition-part">{item.partOfSpeech}</span>
+                {item.text}
+              </li>
+            ))}
+          </ol>
+        </>
+      ) : isHighlightOnly ? null : (
         <span className={status === "error" ? "popover-error" : ""}>{message}</span>
       )}
+      <button className="highlight-button" onClick={onHighlight}>
+        {isHighlightOnly ? "Highlight selection" : "Highlight text"}
+      </button>
     </aside>
   );
 }

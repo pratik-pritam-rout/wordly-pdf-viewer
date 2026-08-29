@@ -292,12 +292,25 @@ h1 {
 }
 .pdf-page {
   position: relative;
+  isolation: isolate;
   margin: 0 auto;
   box-shadow: 0 6px 28px rgba(25, 43, 52, 0.18);
   background: #fff;
 }
 .pdf-page canvas {
   display: block;
+}
+.highlight-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.text-highlight {
+  position: absolute;
+  border-radius: 2px;
+  background: rgba(255, 221, 84, 0.42);
+  mix-blend-mode: multiply;
 }
 .textLayer {
   position: absolute;
@@ -391,6 +404,19 @@ h1 {
 .definition-list li {
   padding-left: 0.1rem;
   margin: 0.35rem 0;
+}
+.highlight-button {
+  margin-top: 0.55rem;
+  border: 1px solid rgba(184, 229, 202, 0.45);
+  border-radius: 5px;
+  background: transparent;
+  color: #b8e5ca;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+.highlight-button:hover {
+  background: rgba(184, 229, 202, 0.12);
 }
 .definition-part {
   display: block;
