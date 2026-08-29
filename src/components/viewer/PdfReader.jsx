@@ -29,19 +29,6 @@ export default function PdfReader(props) {
     window.addEventListener("pointermove", move);
     window.addEventListener("pointerup", stop);
   };
-  const onWheel = (event) => {
-    onDismissPopover();
-    const area = event.currentTarget,
-      atTop = area.scrollTop <= 1,
-      atBottom = area.scrollTop + area.clientHeight >= area.scrollHeight - 1;
-    if (event.deltaY > 0 && atBottom && page < documentState.pdf.numPages) {
-      event.preventDefault();
-      setPage(page + 1);
-    } else if (event.deltaY < 0 && atTop && page > 1) {
-      event.preventDefault();
-      setPage(page - 1);
-    }
-  };
   useEffect(() => {
     const onKeyDown = (event) => {
       const tagName = event.target.tagName;
@@ -66,7 +53,7 @@ export default function PdfReader(props) {
         toggleSummary={() => setSummaryOpen((open) => !open)}
       />
       <div className="reader-content">
-        <div className="page-scroll" ref={scrollRef} onScroll={onDismissPopover} onWheel={onWheel}>
+        <div className="page-scroll" ref={scrollRef} onScroll={onDismissPopover}>
           {loading && <div className="loading">Rendering PDF…</div>}
           <div className="page-container">
             <div className="pdf-page">
